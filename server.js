@@ -3,45 +3,36 @@ import express from "express";
 const app = express();
 
 app.get("/", (req, res) => {
-  res.send("Servidor funcionando");
+  res.send("API Consulta Processos Online");
 });
 
-app.get("/consulta", async (req, res) => {
+app.get("/consulta", (req, res) => {
 
   const nome = req.query.nome || "";
   const cpf = req.query.cpf || "";
 
-  try {
+  const resultados = [
+    {
+      tribunal: "TJSP",
+      processo: "1005678-55.2023.8.26.0100",
+      classe: "Execução",
+      assunto: "Cobrança bancária",
+      data: "2023-05-10",
+      nome,
+      cpf
+    }
+  ];
 
-    const resultados = [
-      {
-        tribunal: "TJSP",
-        status: "consulta simulada",
-        nome: nome,
-        cpf: cpf
-      }
-    ];
-
-    res.json({
-      status: "ok",
-      resultados: resultados
-    });
-
-  } catch (error) {
-
-    console.error(error);
-
-    res.status(500).json({
-      status: "erro",
-      mensagem: "Erro na consulta"
-    });
-
-  }
+  res.json({
+    status: "ok",
+    total: resultados.length,
+    resultados
+  });
 
 });
 
 const PORT = process.env.PORT || 3000;
 
-app.listen(PORT, () => {
-  console.log("Servidor rodando na porta", PORT);
+app.listen(PORT, "0.0.0.0", () => {
+  console.log("Servidor ativo na porta", PORT);
 });
