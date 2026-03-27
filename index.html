@@ -6,7 +6,7 @@
 
 <meta charset="UTF-8">
 
-<title>Consulta de Processos – Tribunais Estaduais</title>
+<title>Consulta Nacional de Processos</title>
 
 <link rel="stylesheet"
 href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
@@ -35,28 +35,47 @@ box-shadow:0 2px 10px rgba(0,0,0,0.1);
 
 <div class="container-box">
 
-<h3>Consulta de Processos – Tribunais de Justiça Estaduais</h3>
+<h3>Consulta Nacional de Processos</h3>
 
 <p class="text-muted">
-Consulta por número do processo na base do CNJ DataJud
+Consulta por nome e CPF do devedor
 </p>
 
-<div class="input-group mb-3">
+<div class="row">
+
+<div class="col">
 
 <input
-id="busca"
+id="nome"
 class="form-control"
-placeholder="Digite o número do processo (CNJ)">
+placeholder="Nome do devedor">
+
+</div>
+
+<div class="col">
+
+<input
+id="cpf"
+class="form-control"
+placeholder="CPF">
+
+</div>
+
+<div class="col">
 
 <button
 class="btn btn-primary"
-onclick="buscar()">
+onclick="consultar()">
 
 Consultar
 
 </button>
 
 </div>
+
+</div>
+
+<br>
 
 <div id="status"></div>
 
@@ -65,12 +84,11 @@ Consultar
 <thead class="table-light">
 
 <tr>
-<th>Número</th>
+<th>Processo</th>
 <th>Tribunal</th>
 <th>Classe</th>
 <th>Assunto</th>
 <th>Data</th>
-<th>Ação contra banco</th>
 </tr>
 
 </thead>
@@ -83,113 +101,43 @@ Consultar
 
 <script>
 
-const APIKEY = "ApiKey cDZHYzlZa0JadVREZDJCendQbXY6SkJlTzNjLV9TRENyQk1RdnFKZGRQdw=="
+async function consultar(){
 
-const tribunais = [
-"tjsp","tjmg","tjrj","tjrs","tjsc","tjpr"
-]
+const nome = document.getElementById("nome").value
+const cpf = document.getElementById("cpf").value
 
-const bancos = [
-"BANCO DO BRASIL",
-"CAIXA",
-"BRADESCO",
-"ITAU",
-"SANTANDER",
-"BTG",
-"SAFRA"
-]
+document.getElementById("status").innerHTML="Consultando..."
 
-function detectarBanco(texto){
+const url = "https://consulta.consultaacao.workers.dev/consulta?nome="+encodeURIComponent(nome)+"&cpf="+cpf
 
-if(!texto) return ""
+const r = await fetch(url)
 
-texto = texto.toUpperCase()
+const data = await r.json()
 
-for(let b of bancos){
-
-if(texto.includes(b)){
-return "SIM"
-}
-
-}
-
-return ""
-
-}
-
-async function buscar(){
-
-let numeroProcesso = document.getElementById("busca").value
-
-let tabela = document.getElementById("resultado")
+const tabela = document.getElementById("resultado")
 
 tabela.innerHTML=""
 
-document.getElementById("status").innerHTML="Consultando tribunais..."
-
-for(let tribunal of tribunais){
-
-try{
-
-let query = {
-
-query:{
-term:{
-numeroProcesso: numeroProcesso
-}
-}
-
-}
-
-let url = "https://api-publica.datajud.cnj.jus.br/api_publica_"+tribunal+"/_search"
-
-let r = await fetch("https://corsproxy.io/?"+encodeURIComponent(url),{
-
-method:"POST",
-
-headers:{
-"Content-Type":"application/json",
-"Authorization":APIKEY
-},
-
-body:JSON.stringify(query)
-
-})
-
-let data = await r.json()
-
-let hits = data.hits?.hits || []
-
-hits.forEach(p=>{
-
-let s = p._source
-
-let banco = detectarBanco(s.assunto)
+data.processos.forEach(p=>{
 
 tabela.innerHTML += `
 
 <tr>
-<td>${s.numeroProcesso || ""}</td>
-<td>${s.tribunal || ""}</td>
-<td>${s.classe?.nome || ""}</td>
-<td>${s.assunto || ""}</td>
-<td>${s.dataAjuizamento || ""}</td>
-<td>${banco}</td>
+
+<td>${p.numero}</td>
+<td>${p.tribunal}</td>
+<td>${p.classe}</td>
+<td>${p.assunto}</td>
+<td>${p.data}</td>
+
 </tr>
 
 `
 
 })
 
-}catch(e){
-
-console.log("Erro no tribunal", tribunal)
-
-}
-
-}
-
-document.getElementById("status").innerHTML="Consulta finalizada"
+document.getElementById("status").innerHTML=
+"Processos encontrados: "+data.processos.length
 
 }
 
