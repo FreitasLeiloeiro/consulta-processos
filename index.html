@@ -86,9 +86,7 @@ Consultar
 const APIKEY = "ApiKey cDZHYzlZa0JadVREZDJCendQbXY6SkJlTzNjLV9TRENyQk1RdnFKZGRQdw=="
 
 const tribunais = [
-"tjsp","tjmg","tjrj","tjrs","tjsc","tjpr","tjba","tjgo","tjpe","tjce",
-"tjam","tjmt","tjdft","tjro","tjac","tjap","tjrr","tjpi","tjma","tjse",
-"tjal"
+"tjsp","tjmg","tjrj","tjrs","tjsc","tjpr"
 ]
 
 const bancos = [
@@ -110,9 +108,7 @@ texto = texto.toUpperCase()
 for(let b of bancos){
 
 if(texto.includes(b)){
-
 return "SIM"
-
 }
 
 }
@@ -138,26 +134,26 @@ try{
 let query = {
 
 query:{
-
 term:{
 numeroProcesso: numeroProcesso
 }
-
-},
-
-size:10
+}
 
 }
 
-let r = await fetch(
-"https://api-publica.datajud.cnj.jus.br/api_publica_"+tribunal+"/_search",
-{
+let url = "https://api-publica.datajud.cnj.jus.br/api_publica_"+tribunal+"/_search"
+
+let r = await fetch("https://corsproxy.io/?"+encodeURIComponent(url),{
+
 method:"POST",
+
 headers:{
 "Content-Type":"application/json",
 "Authorization":APIKEY
 },
+
 body:JSON.stringify(query)
+
 })
 
 let data = await r.json()
@@ -173,14 +169,12 @@ let banco = detectarBanco(s.assunto)
 tabela.innerHTML += `
 
 <tr>
-
 <td>${s.numeroProcesso || ""}</td>
 <td>${s.tribunal || ""}</td>
 <td>${s.classe?.nome || ""}</td>
 <td>${s.assunto || ""}</td>
 <td>${s.dataAjuizamento || ""}</td>
 <td>${banco}</td>
-
 </tr>
 
 `
