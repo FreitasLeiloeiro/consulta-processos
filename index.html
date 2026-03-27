@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 
 <html lang="pt-br">
+
 <head>
 
 <meta charset="UTF-8">
@@ -17,7 +18,7 @@ background:#f4f6f9;
 }
 
 .container-box{
-max-width:1100px;
+max-width:1200px;
 margin:auto;
 margin-top:40px;
 background:white;
@@ -35,6 +36,10 @@ box-shadow:0 2px 10px rgba(0,0,0,0.1);
 <div class="container-box">
 
 <h3>Consulta de Processos – Tribunais de Justiça Estaduais</h3>
+
+<p class="text-muted">
+Consulta baseada na API pública do CNJ DataJud
+</p>
 
 <div class="input-group mb-3">
 
@@ -55,9 +60,9 @@ Consultar
 
 <div id="status"></div>
 
-<table class="table table-bordered">
+<table class="table table-bordered table-sm">
 
-<thead>
+<thead class="table-light">
 
 <tr>
 <th>Número</th>
@@ -65,6 +70,7 @@ Consultar
 <th>Classe</th>
 <th>Assunto</th>
 <th>Data</th>
+<th>Ação contra banco</th>
 </tr>
 
 </thead>
@@ -77,16 +83,81 @@ Consultar
 
 <script>
 
+const APIKEY = "ApiKey cDZHYzlZa0JadVREZDJCendQbXY6SkJlTzNjLV9TRENyQk1RdnFKZGRQdw=="
+
+const tribunais = [
+"tjsp",
+"tjmg",
+"tjrj",
+"tjrs",
+"tjsc",
+"tjpr",
+"tjba",
+"tjgo",
+"tjpe",
+"tjce",
+"tjam",
+"tjmt",
+"tjdft",
+"tjro",
+"tjac",
+"tjap",
+"tjrr",
+"tjpi",
+"tjma",
+"tjse",
+"tjal",
+"tjrj"
+]
+
+const bancos = [
+"BANCO DO BRASIL",
+"CAIXA",
+"BRADESCO",
+"ITAU",
+"SANTANDER",
+"BTG",
+"SAFRA"
+]
+
+function detectarBanco(texto){
+
+if(!texto) return ""
+
+texto = texto.toUpperCase()
+
+for(let b of bancos){
+
+if(texto.includes(b)){
+
+return "SIM"
+
+}
+
+}
+
+return ""
+
+}
+
 async function buscar(){
 
-let termo=document.getElementById("busca").value
+let termo = document.getElementById("busca").value
 
-document.getElementById("status").innerHTML="Consultando..."
+let tabela = document.getElementById("resultado")
 
-let query={
+tabela.innerHTML=""
+
+document.getElementById("status").innerHTML="Consultando tribunais..."
+
+for(let tribunal of tribunais){
+
+try{
+
+let query = {
 query:{
 multi_match:{
-query:termo,
+query: termo,
 fields:[
 "numeroProcesso",
 "nomeParte",
@@ -94,42 +165,40 @@ fields:[
 ]
 }
 },
-size:50
+size:10
 }
 
-let r=await fetch(
-"https://api.allorigins.win/raw?url=https://api-publica.datajud.cnj.jus.br/api_publica/_search",
+let r = await fetch(
+"https://api-publica.datajud.cnj.jus.br/api_publica_"+tribunal+"/_search",
 {
 method:"POST",
 headers:{
-"Content-Type":"application/json"
+"Content-Type":"application/json",
+"Authorization":APIKEY
 },
 body:JSON.stringify(query)
 })
 
-let data=await r.json()
+let data = await r.json()
 
-let tabela=document.getElementById("resultado")
-
-tabela.innerHTML=""
-
-let hits=data.hits?.hits || []
+let hits = data.hits?.hits || []
 
 hits.forEach(p=>{
 
-let s=p._source
+let s = p._source
 
-if(!s.tribunal.startsWith("TJ")) return
+let banco = detectarBanco(s.assunto)
 
-tabela.innerHTML+=`
+tabela.innerHTML += `
 
 <tr>
 
-<td>${s.numeroProcesso}</td>
-<td>${s.tribunal}</td>
-<td>${s.classeProcessual}</td>
-<td>${s.assunto}</td>
-<td>${s.dataAjuizamento}</td>
+<td>${s.numeroProcesso || ""}</td>
+<td>${s.tribunal || ""}</td>
+<td>${s.classe?.nome || ""}</td>
+<td>${s.assunto || ""}</td>
+<td>${s.dataAjuizamento || ""}</td>
+<td>${banco}</td>
 
 </tr>
 
@@ -137,13 +206,20 @@ tabela.innerHTML+=`
 
 })
 
-document.getElementById("status").innerHTML=
-"Processos encontrados: "+hits.length
+}catch(e){
+
+console.log("Erro no tribunal", tribunal)
+
+}
+
+}
+
+document.getElementById("status").innerHTML="Consulta finalizada"
 
 }
 
 </script>
 
 </body>
-</html>
 
+</html>
