@@ -86,28 +86,9 @@ Consultar
 const APIKEY = "ApiKey cDZHYzlZa0JadVREZDJCendQbXY6SkJlTzNjLV9TRENyQk1RdnFKZGRQdw=="
 
 const tribunais = [
-"tjsp",
-"tjmg",
-"tjrj",
-"tjrs",
-"tjsc",
-"tjpr",
-"tjba",
-"tjgo",
-"tjpe",
-"tjce",
-"tjam",
-"tjmt",
-"tjdft",
-"tjro",
-"tjac",
-"tjap",
-"tjrr",
-"tjpi",
-"tjma",
-"tjse",
-"tjal",
-"tjrj"
+"tjsp","tjmg","tjrj","tjrs","tjsc","tjpr","tjba","tjgo","tjpe","tjce",
+"tjam","tjmt","tjdft","tjro","tjac","tjap","tjrr","tjpi","tjma","tjse",
+"tjal"
 ]
 
 const bancos = [
@@ -155,17 +136,39 @@ for(let tribunal of tribunais){
 try{
 
 let query = {
+
 query:{
-multi_match:{
-query: termo,
-fields:[
-"numeroProcesso",
-"nomeParte",
-"documentoParte"
-]
+
+bool:{
+
+should:[
+
+{
+match_phrase_prefix:{
+"partes.nome": termo
 }
 },
-size:10
+
+{
+match_phrase_prefix:{
+"partes.documento": termo
+}
+},
+
+{
+match_phrase_prefix:{
+"numeroProcesso": termo
+}
+}
+
+]
+
+}
+
+},
+
+size:20
+
 }
 
 let r = await fetch(
