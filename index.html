@@ -160,7 +160,16 @@ document.getElementById("resultado").innerHTML = `
 
 document.getElementById("status").innerHTML="Consulta realizada com sucesso."
 
-let link = "https://esaj.tjsp.jus.br/cpopg/show.do?processo.numero="+numero
+/* EXTRAIR FORO AUTOMATICAMENTE */
+
+let partes = numero.split(".")
+let foro = partes[partes.length-1]
+
+foro = parseInt(foro)
+
+/* GERAR LINK TJSP */
+
+let link = "https://esaj.tjsp.jus.br/cpopg/show.do?processo.foro="+foro+"&processo.numero="+numero
 
 document.getElementById("linkProcesso").innerHTML =
 `<a href="${link}" target="_blank">Abrir processo no TJSP</a>`
