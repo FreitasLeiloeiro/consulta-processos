@@ -36,6 +36,10 @@ color:white;
 cursor:pointer;
 }
 
+button:hover{
+background:#4338ca;
+}
+
 table{
 width:100%;
 margin-top:20px;
@@ -50,6 +54,11 @@ text-align:left;
 
 th{
 background:#f0f0f0;
+}
+
+.status{
+margin-top:15px;
+font-weight:bold;
 }
 
 .link{
@@ -82,7 +91,9 @@ margin-top:20px;
 
 <button onclick="consultar()">Consultar</button>
 
-<table id="tabela">
+<div class="status" id="status"></div>
+
+<table>
 
 <thead>
 <tr>
@@ -94,7 +105,7 @@ margin-top:20px;
 </tr>
 </thead>
 
-<tbody></tbody>
+<tbody id="resultado"></tbody>
 
 </table>
 
@@ -106,24 +117,29 @@ margin-top:20px;
 
 async function consultar(){
 
-let nome = document.getElementById("nome").value
-let cpf = document.getElementById("cpf").value
-let processo = document.getElementById("processo").value
-let estado = document.getElementById("estado").value
+let numero = document.getElementById("processo").value
 
-let url = "https://consulta-processos-dxx8.onrender.com/processo?numero="+processo
+if(!numero){
+
+document.getElementById("status").innerHTML="Informe o número do processo."
+
+return
+
+}
+
+document.getElementById("status").innerHTML="Consultando..."
+
+try{
+
+let url = "https://consulta-processos-dxx8.onrender.com/processo?numero="+numero
 
 let resposta = await fetch(url)
 
 let dados = await resposta.json()
 
-let tabela = document.querySelector("#tabela tbody")
-
-tabela.innerHTML=""
-
 let r = dados.resultado
 
-let linha = `
+document.getElementById("resultado").innerHTML = `
 <tr>
 <td>${r.tribunal}</td>
 <td>${r.processo}</td>
@@ -133,16 +149,16 @@ let linha = `
 </tr>
 `
 
-tabela.innerHTML = linha
+document.getElementById("status").innerHTML="Consulta realizada."
 
-// link direto TJSP
-if(estado=="SP"){
-
-let link = "https://esaj.tjsp.jus.br/cpopg/show.do?processo.numero="+processo
+let link = "https://esaj.tjsp.jus.br/cpopg/show.do?processo.numero="+numero
 
 document.getElementById("linkProcesso").innerHTML =
-
 `<a href="${link}" target="_blank">Abrir processo no TJSP</a>`
+
+}catch(e){
+
+document.getElementById("status").innerHTML="Erro na consulta."
 
 }
 
