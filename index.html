@@ -13,7 +13,7 @@ padding:40px;
 }
 
 .container{
-max-width:900px;
+max-width:950px;
 margin:auto;
 background:white;
 padding:30px;
@@ -21,19 +21,16 @@ border-radius:10px;
 box-shadow:0 5px 20px rgba(0,0,0,0.1);
 }
 
-h1{
-margin-bottom:10px;
-}
-
 input,select{
 padding:10px;
 margin-right:10px;
+margin-top:10px;
 width:200px;
 }
 
 button{
 padding:10px 20px;
-background:#3b5cff;
+background:#4f46e5;
 border:none;
 color:white;
 cursor:pointer;
@@ -55,6 +52,10 @@ th{
 background:#f0f0f0;
 }
 
+.link{
+margin-top:20px;
+}
+
 </style>
 
 </head>
@@ -70,14 +71,13 @@ background:#f0f0f0;
 
 <input id="cpf" placeholder="CPF">
 
-<select id="estado">
+<input id="processo" placeholder="Número do processo">
 
+<select id="estado">
 <option value="SP">São Paulo</option>
 <option value="MG">Minas Gerais</option>
 <option value="RJ">Rio de Janeiro</option>
 <option value="PR">Paraná</option>
-<option value="RS">Rio Grande do Sul</option>
-
 </select>
 
 <button onclick="consultar()">Consultar</button>
@@ -98,6 +98,8 @@ background:#f0f0f0;
 
 </table>
 
+<div class="link" id="linkProcesso"></div>
+
 </div>
 
 <script>
@@ -106,9 +108,10 @@ async function consultar(){
 
 let nome = document.getElementById("nome").value
 let cpf = document.getElementById("cpf").value
+let processo = document.getElementById("processo").value
 let estado = document.getElementById("estado").value
 
-let url = "https://consulta-processos-dxx8.onrender.com/consulta?nome="+nome+"&cpf="+cpf+"&estado="+estado
+let url = "https://consulta-processos-dxx8.onrender.com/processo?numero="+processo
 
 let resposta = await fetch(url)
 
@@ -118,21 +121,30 @@ let tabela = document.querySelector("#tabela tbody")
 
 tabela.innerHTML=""
 
-dados.resultados.forEach(p => {
+let r = dados.resultado
 
 let linha = `
 <tr>
-<td>${p.tribunal}</td>
-<td>${p.processo}</td>
-<td>${p.classe}</td>
-<td>${p.assunto}</td>
-<td>${p.banco}</td>
+<td>${r.tribunal}</td>
+<td>${r.processo}</td>
+<td>${r.classe}</td>
+<td>${r.assunto}</td>
+<td>${r.banco}</td>
 </tr>
 `
 
-tabela.innerHTML += linha
+tabela.innerHTML = linha
 
-})
+// link direto TJSP
+if(estado=="SP"){
+
+let link = "https://esaj.tjsp.jus.br/cpopg/show.do?processo.numero="+processo
+
+document.getElementById("linkProcesso").innerHTML =
+
+`<a href="${link}" target="_blank">Abrir processo no TJSP</a>`
+
+}
 
 }
 
