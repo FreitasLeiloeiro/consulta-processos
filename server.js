@@ -1,5 +1,4 @@
 import express from "express";
-import { chromium } from "playwright";
 
 const app = express();
 
@@ -8,13 +7,7 @@ const bancos = [
 "Caixa Econômica Federal",
 "Bradesco",
 "Itaú",
-"Santander",
-"Sicoob",
-"Sicredi",
-"Safra",
-"BTG",
-"Inter",
-"C6"
+"Santander"
 ];
 
 function identificarBanco(texto){
@@ -25,33 +18,17 @@ app.get("/", (req,res)=>{
 res.send("API Consulta Processos Online");
 });
 
-app.get("/consulta", async (req,res)=>{
+app.get("/consulta",(req,res)=>{
 
 const nome = req.query.nome || "";
 const cpf = req.query.cpf || "";
-
-let resultados = [];
-
-const browser = await chromium.launch({
-headless:true
-});
-
-const page = await browser.newPage();
-
-try{
-
-await page.goto("https://esaj.tjsp.jus.br/cpopg/open.do");
-
-await page.waitForTimeout(3000);
-
-// aqui vamos implementar a busca real
-// nesta versão vamos apenas simular resultado
 
 const partes = "Banco do Brasil S/A vs João da Silva";
 
 const banco = identificarBanco(partes);
 
-resultados.push({
+const resultados = [
+{
 tribunal:"TJSP",
 processo:"1005678-55.2023.8.26.0100",
 classe:"Execução",
@@ -61,15 +38,8 @@ banco,
 acao_contra_banco: banco ? true : false,
 nome,
 cpf
-});
-
-}catch(e){
-
-console.log(e);
-
 }
-
-await browser.close();
+];
 
 res.json({
 status:"ok",
