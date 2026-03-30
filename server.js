@@ -40,13 +40,13 @@ const page = await browser.newPage();
 
 try{
 
-// abre consulta pública TJSP
 await page.goto("https://esaj.tjsp.jus.br/cpopg/open.do");
 
-// aguarda carregamento
 await page.waitForTimeout(3000);
 
-// simulação de resultado (substituiremos pela extração real)
+// aqui vamos implementar a busca real
+// nesta versão vamos apenas simular resultado
+
 const partes = "Banco do Brasil S/A vs João da Silva";
 
 const banco = identificarBanco(partes);
