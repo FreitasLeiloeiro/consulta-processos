@@ -2,65 +2,27 @@ import express from "express";
 
 const app = express();
 
-const bancos = [
-"Banco do Brasil",
-"Caixa Econômica Federal",
-"Bradesco",
-"Itaú",
-"Santander"
-];
-
-function identificarBanco(texto){
-return bancos.find(b => texto.toLowerCase().includes(b.toLowerCase())) || null;
-}
-
 app.get("/", (req,res)=>{
 res.send("API Consulta Processos Online");
 });
 
-app.get("/consulta", async (req,res)=>{
+app.get("/processo",(req,res)=>{
 
-const nome = req.query.nome || "";
-const cpf = req.query.cpf || "";
+const numero = req.query.numero;
 
-let resultados = [];
-
-// simulação de consulta DataJud
-const processos = [
-{
+const resultado = {
 tribunal:"TJSP",
-processo:"1005678-55.2023.8.26.0100",
-classe:"Execução",
+processo:numero,
+classe:"Execução de título extrajudicial",
 assunto:"Cobrança bancária",
-partes:"Banco do Brasil vs João da Silva",
-data:"2023-05-10"
-}
-];
-
-processos.forEach(p => {
-
-const banco = identificarBanco(p.partes);
-
-if(banco){
-resultados.push({
-tribunal:p.tribunal,
-processo:p.processo,
-classe:p.classe,
-assunto:p.assunto,
-data:p.data,
-banco:banco,
-acao_contra_banco:true,
-nome,
-cpf
-});
-}
-
-});
+data:"2023-05-10",
+banco:"Banco do Brasil",
+acao_contra_banco:true
+};
 
 res.json({
 status:"ok",
-total:resultados.length,
-resultados
+resultado
 });
 
 });
