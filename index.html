@@ -7,59 +7,48 @@
 <style>
 
 body{
-font-family: Arial;
-background:#f4f6f8;
+font-family:Arial;
+background:#f4f6f9;
 padding:40px;
 }
 
 .container{
+max-width:900px;
+margin:auto;
 background:white;
 padding:30px;
 border-radius:10px;
-max-width:900px;
-margin:auto;
 box-shadow:0 5px 20px rgba(0,0,0,0.1);
 }
 
 h1{
-margin-bottom:5px;
+margin-bottom:10px;
 }
 
-.sub{
-color:#666;
-margin-bottom:20px;
-}
-
-input,select{
+input{
 padding:10px;
-width:250px;
 margin-right:10px;
-border:1px solid #ccc;
-border-radius:5px;
+width:220px;
 }
 
 button{
 padding:10px 20px;
-background:#3b5bdb;
-color:white;
+background:#3b5cff;
 border:none;
-border-radius:5px;
+color:white;
 cursor:pointer;
 }
 
-button:hover{
-background:#2f4cc7;
-}
-
 table{
-margin-top:20px;
 width:100%;
+margin-top:20px;
 border-collapse:collapse;
 }
 
 th,td{
 border:1px solid #ddd;
-padding:8px;
+padding:10px;
+text-align:left;
 }
 
 th{
@@ -75,50 +64,27 @@ background:#f0f0f0;
 <div class="container">
 
 <h1>Consulta Nacional de Processos</h1>
-<div class="sub">Pesquisa por nome e CPF do devedor</div>
+<p>Pesquisa interna para análise de devedores</p>
 
 <input id="nome" placeholder="Nome do devedor">
 
 <input id="cpf" placeholder="CPF">
 
-<select id="estado">
-
-<option value="SP">São Paulo</option>
-<option value="MG">Minas Gerais</option>
-<option value="RJ">Rio de Janeiro</option>
-<option value="PR">Paraná</option>
-<option value="RS">Rio Grande do Sul</option>
-<option value="SC">Santa Catarina</option>
-<option value="BA">Bahia</option>
-<option value="GO">Goiás</option>
-<option value="PE">Pernambuco</option>
-<option value="CE">Ceará</option>
-<option value="PA">Pará</option>
-<option value="MT">Mato Grosso</option>
-<option value="MS">Mato Grosso do Sul</option>
-<option value="ES">Espírito Santo</option>
-<option value="DF">Distrito Federal</option>
-
-</select>
-
 <button onclick="consultar()">Consultar</button>
 
-<div id="resultado"></div>
-
-<table id="tabela" style="display:none">
+<table id="tabela">
 
 <thead>
 <tr>
-<th>Processo</th>
 <th>Tribunal</th>
+<th>Processo</th>
 <th>Classe</th>
 <th>Assunto</th>
-<th>Data</th>
 <th>Banco</th>
 </tr>
 </thead>
 
-<tbody id="dados"></tbody>
+<tbody></tbody>
 
 </table>
 
@@ -128,49 +94,34 @@ background:#f0f0f0;
 
 async function consultar(){
 
-const nome = document.getElementById("nome").value
-const cpf = document.getElementById("cpf").value
-const estado = document.getElementById("estado").value
+let nome = document.getElementById("nome").value
+let cpf = document.getElementById("cpf").value
 
-document.getElementById("resultado").innerHTML="Consultando..."
+let url = "https://consulta-processos-dxx8.onrender.com/consulta?nome="+nome+"&cpf="+cpf
 
-const url =
-"https://consulta-processos-dxx8.onrender.com/consulta?nome="
-+ encodeURIComponent(nome)
-+ "&cpf="
-+ encodeURIComponent(cpf)
-+ "&estado="
-+ estado
+let resposta = await fetch(url)
 
-const resposta = await fetch(url)
+let dados = await resposta.json()
 
-const data = await resposta.json()
+let tabela = document.querySelector("#tabela tbody")
 
-document.getElementById("resultado").innerHTML =
-"Processos encontrados: " + data.total
+tabela.innerHTML=""
 
-const tabela = document.getElementById("tabela")
-const tbody = document.getElementById("dados")
+dados.resultados.forEach(p => {
 
-tbody.innerHTML=""
+let linha = `
+<tr>
+<td>${p.tribunal}</td>
+<td>${p.processo}</td>
+<td>${p.classe}</td>
+<td>${p.assunto}</td>
+<td>${p.banco}</td>
+</tr>
+`
 
-data.resultados.forEach(p => {
-
-const linha =
-"<tr>" +
-"<td>"+p.processo+"</td>"+
-"<td>"+p.tribunal+"</td>"+
-"<td>"+p.classe+"</td>"+
-"<td>"+p.assunto+"</td>"+
-"<td>"+p.data+"</td>"+
-"<td>"+p.banco+"</td>"+
-"</tr>"
-
-tbody.innerHTML += linha
+tabela.innerHTML += linha
 
 })
-
-tabela.style.display="table"
 
 }
 
